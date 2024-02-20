@@ -90,18 +90,13 @@ public class FakePaymentCaseRepository implements PaymentCaseRepository {
 
     @Override
     public <S extends PaymentCase> S save(S entity) {
-        map.put(count++, entity);
+        map.put(entity.getReturnedPayment().getPaymentId(), entity);
         return entity;
     }
 
     @Override
     public Optional<PaymentCase> findById(Long aLong) {
-        return Optional.of( map.entrySet()
-                .stream()
-                .filter(x -> x.getValue().getReturnedPayment().getPaymentId().equals(aLong))
-                .findFirst()
-                .get()
-                .getValue());
+        return Optional.of(map.get(aLong));
     }
 
     @Override
