@@ -12,7 +12,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
 @RestController
-@RequestMapping("/api/v1/case")
+@RequestMapping("/api/v1/")
 public class CaseController {
 
 
@@ -22,12 +22,12 @@ public class CaseController {
         this.service = service;
     }
 
-    @PostMapping("/create")
+    @PostMapping("/cases")
     public ResponseEntity<PaymentCase> createPaymentCase(@RequestBody PaymentRequest request) {
         return new ResponseEntity<>(service.createNewCase(request), CREATED);
     }
 
-    @PostMapping("/solve")
+    @PostMapping("/solveCase")
     public ResponseEntity<PaymentCase> solvePaymentCase(@RequestBody CaseSolvingRequest request) {
         return new ResponseEntity(service.solveCase(request), OK);
     }
