@@ -10,6 +10,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import vilksp.returnedService.model.Amount;
 import vilksp.returnedService.model.PaymentType;
 import vilksp.returnedService.model.ResolutionStatus;
 import vilksp.returnedService.payload.CaseSolvingRequest;
@@ -40,10 +41,8 @@ class CaseControllerTest {
 
     @Test
     void createPaymentCase() throws JSONException {
-        PaymentRequest pr = new PaymentRequest(1L, BigDecimal.valueOf(10123.22), "EUR", PaymentType.NORMAL);
-
+        PaymentRequest pr = new PaymentRequest(1L, new Amount(BigDecimal.valueOf(10123.22),"EUR"), PaymentType.NORMAL);
         HttpHeaders headers = new HttpHeaders();
-
         HttpEntity<PaymentRequest> he = new HttpEntity<>(pr, headers);
 
         ResponseEntity<?> response = restTemplate.postForEntity("/api/v1/cases", he, String.class);
@@ -52,14 +51,15 @@ class CaseControllerTest {
 
         assertEquals(response.getStatusCode().value(), 201);
 
-        var returnedPayment = jsonObject.get("returnedPayment");
-        assertEquals(((JSONObject) returnedPayment).get("currency"), "EUR");
-        assertEquals(((JSONObject) returnedPayment).get("amount"), 10123.22);
+        var returnedPayment = jsonObject.get("payment");
+        var getAmount = ((JSONObject) returnedPayment).get("amount");
+        assertEquals(((JSONObject) getAmount).get("currency"), "EUR");
+        assertEquals(((JSONObject) getAmount).get("value"), 10123.22);
     }
 
     @Test
     void solvePaymentCase() throws JSONException {
-        PaymentRequest pr = new PaymentRequest(1L, BigDecimal.valueOf(10123.22), "EUR", PaymentType.NORMAL);
+        PaymentRequest pr = new PaymentRequest(1L, new Amount(BigDecimal.valueOf(10123.22),"EUR"), PaymentType.NORMAL);
         HttpHeaders hh = new HttpHeaders();
         HttpEntity<PaymentRequest> httpEntity = new HttpEntity<>(pr, hh);
         restTemplate.postForEntity("/api/v1/cases", httpEntity, String.class);
@@ -70,13 +70,13 @@ class CaseControllerTest {
         ResponseEntity<?> response = restTemplate.postForEntity("/api/v1/solveCase", he, String.class);
 
         JSONObject jsonObject = new JSONObject(response.getBody().toString());
-        var returnedPayment = jsonObject.get("returnedPayment");
+        var returnedPayment = jsonObject.get("payment");
         assertEquals(((JSONObject) returnedPayment).get("status"), "RESUBMIT");
     }
 
     @Test
     void exceptionIsThrownWhenReturnedPaymentIsReturnedAgain() {
-        PaymentRequest pr = new PaymentRequest(1L, BigDecimal.valueOf(10123.22), "EUR", PaymentType.RETURNED);
+        PaymentRequest pr = new PaymentRequest(1L, new Amount(BigDecimal.valueOf(10123.22),"EUR"), PaymentType.RETURNED);
         HttpHeaders hh = new HttpHeaders();
         HttpEntity<PaymentRequest> httpEntity = new HttpEntity<>(pr, hh);
         restTemplate.postForEntity("/api/v1/cases", httpEntity, String.class);
@@ -91,7 +91,7 @@ class CaseControllerTest {
 
     @Test
     void getCountOfActiveCases() {
-        PaymentRequest pr = new PaymentRequest(1L, BigDecimal.valueOf(10123.22), "EUR", PaymentType.NORMAL);
+        PaymentRequest pr = new PaymentRequest(1L, new Amount(BigDecimal.valueOf(10123.22),"EUR"), PaymentType.NORMAL);
         HttpHeaders hh = new HttpHeaders();
         HttpEntity<PaymentRequest> httpEntity = new HttpEntity<>(pr, hh);
         restTemplate.postForEntity("/api/v1/cases", httpEntity, String.class);

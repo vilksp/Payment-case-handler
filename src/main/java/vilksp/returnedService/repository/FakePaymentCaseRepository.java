@@ -17,6 +17,13 @@ public class FakePaymentCaseRepository implements PaymentCaseRepository {
     private HashMap<Long, PaymentCase> map = new HashMap<>();
     private long count = 0L;
 
+    @Override
+    public Long countOfActiveCases() {
+        return map.entrySet()
+                .stream()
+                .filter(x -> !x.getValue().isSolved())
+                .count();
+    }
 
     @Override
     public void flush() {
@@ -90,7 +97,7 @@ public class FakePaymentCaseRepository implements PaymentCaseRepository {
 
     @Override
     public <S extends PaymentCase> S save(S entity) {
-        map.put(entity.getReturnedPayment().getPaymentId(), entity);
+        map.put(entity.getPayment().getPaymentId(), entity);
         return entity;
     }
 
@@ -167,14 +174,5 @@ public class FakePaymentCaseRepository implements PaymentCaseRepository {
     @Override
     public <S extends PaymentCase, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
         return null;
-    }
-
-    @Override
-    public Long countOfActiveCases() {
-        return map.entrySet()
-                .stream()
-                .filter(x -> x != null && !x.getValue().getReturnedPayment()
-                        .isSolved())
-                .count();
     }
 }

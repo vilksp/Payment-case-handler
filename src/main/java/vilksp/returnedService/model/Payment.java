@@ -4,55 +4,41 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-
-import java.math.BigDecimal;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 public class Payment {
     @Id
     @GeneratedValue
     private Long id;
-    @Column(unique=true)
+    @Column(unique = true)
     private Long paymentId;
 
-    private BigDecimal amount;
-    private String currency;
-    private PaymentType type;
 
-    private boolean solved;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition="JSON")
+    private Amount amount;
+    private PaymentType type;
 
     private ResolutionStatus status;
 
-    public Payment(Long paymentId, BigDecimal amount, String currency, PaymentType type) {
+    private Payment(Long paymentId, Amount amount, PaymentType type) {
         this.paymentId = paymentId;
         this.amount = amount;
-        this.currency = currency;
         this.type = type;
-        this.solved = false;
         this.status = ResolutionStatus.NONE;
     }
 
     public Payment() {
     }
 
-    public void setStatus(ResolutionStatus status) {
-        this.status = status;
+    public static Payment create(Long paymentId, Amount amount, PaymentType type) {
+        return new Payment(paymentId, amount, type);
     }
 
-    public PaymentType getType() {
-        return type;
-    }
-
-    public ResolutionStatus getStatus() {
-        return status;
-    }
-
-    public boolean isSolved() {
-        return solved;
-    }
-
-    public void setSolved(boolean solved) {
-        this.solved = solved;
+    public void changeResolutionStatus(ResolutionStatus statusToChange) {
+        this.status = statusToChange;
     }
 
     public Long getId() {
@@ -63,11 +49,15 @@ public class Payment {
         return paymentId;
     }
 
-    public BigDecimal getAmount() {
+    public Amount getAmount() {
         return amount;
     }
 
-    public String getCurrency() {
-        return currency;
+    public PaymentType getType() {
+        return type;
+    }
+
+    public ResolutionStatus getStatus() {
+        return status;
     }
 }

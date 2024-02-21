@@ -1,14 +1,11 @@
 package vilksp.returnedService.model;
 
 import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
-
 @Entity
 public class PaymentCase {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "caseId")
@@ -19,30 +16,40 @@ public class PaymentCase {
     private Payment payment;
 
     private LocalDateTime createdAt;
+    private boolean solved;
 
-    public PaymentCase(Long l, Payment eur) {
+    private PaymentCase(Payment payment) {
+        this.payment = payment;
+        this.createdAt = LocalDateTime.now();
+        this.solved = false;
     }
 
     public PaymentCase() {
+    }
+
+    public static PaymentCase create(Payment payment) {
+        return new PaymentCase(payment);
+    }
+
+    public void solve() {
+        if (isSolved()) throw new RuntimeException();
+        this.solved = true;
+    }
+
+    public Payment getPayment() {
+        return payment;
+    }
+
+    public Long getCaseId() {
+        return caseId;
     }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public boolean isSolved() {
+        return solved;
     }
 
-    public Payment getReturnedPayment() {
-        return payment;
-    }
-
-    public void setPayment(Payment payment) {
-        this.payment = payment;
-    }
-
-    public Long getCaseId() {
-        return caseId;
-    }
 }

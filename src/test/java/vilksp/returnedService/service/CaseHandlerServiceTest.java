@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import vilksp.returnedService.model.Amount;
 import vilksp.returnedService.model.PaymentType;
 import vilksp.returnedService.model.ResolutionStatus;
 import vilksp.returnedService.model.constants.ExceptionMessages;
@@ -32,23 +33,23 @@ class CaseHandlerServiceTest {
     @Test
     void createNewCase() {
 
-        var returnedPaymentCase = service.createNewCase(new PaymentRequest(1l, BigDecimal.valueOf(102.2), "EUR", PaymentType.NORMAL));
+        var returnedPaymentCase = service.createNewCase(new PaymentRequest(1L, new Amount(BigDecimal.valueOf(102.2), "EUR"), PaymentType.NORMAL));
 
-        assertEquals(returnedPaymentCase.getReturnedPayment().getPaymentId(), 1L);
+        assertEquals(returnedPaymentCase.getPayment().getPaymentId(), 1L);
     }
 
     @Test
     void solveCase() {
-        service.createNewCase(new PaymentRequest(1l, BigDecimal.valueOf(102.2), "EUR", PaymentType.NORMAL));
+        service.createNewCase(new PaymentRequest(1l, new Amount(BigDecimal.valueOf(102.2), "EUR"), PaymentType.NORMAL));
 
         var solvedCase = service.solveCase(new CaseSolvingRequest(1L, ResolutionStatus.RETURN));
 
-        assertEquals(solvedCase.getReturnedPayment().getStatus(), ResolutionStatus.RETURN);
+        assertEquals(solvedCase.getPayment().getStatus(), ResolutionStatus.RETURN);
     }
 
     @Test
     void exceptionIsThrownWhenReturnedPaymentIsReturnedAgain() {
-        service.createNewCase(new PaymentRequest(1l, BigDecimal.valueOf(102.2), "EUR", PaymentType.RETURNED));
+        service.createNewCase(new PaymentRequest(1l, new Amount(BigDecimal.valueOf(102.2), "EUR"), PaymentType.RETURNED));
 
         var exception = assertThrows(CaseHandlerException.class, () -> {
             service.solveCase(new CaseSolvingRequest(1L, ResolutionStatus.RETURN));
@@ -59,7 +60,7 @@ class CaseHandlerServiceTest {
 
     @Test
     void exceptionIsThrownWithWrongArguments() {
-        service.createNewCase(new PaymentRequest(1l, BigDecimal.valueOf(102.2), "EUR", PaymentType.RETURNED));
+        service.createNewCase(new PaymentRequest(1l, new Amount(BigDecimal.valueOf(102.2), "EUR"), PaymentType.RETURNED));
 
         var exception = assertThrows(CaseHandlerException.class, () -> {
             service.solveCase(new CaseSolvingRequest(-100L, ResolutionStatus.NONE));
@@ -70,7 +71,7 @@ class CaseHandlerServiceTest {
 
     @Test
     void exceptionIsThrownWhenCaseIsResubmitted() {
-        service.createNewCase(new PaymentRequest(1l, BigDecimal.valueOf(102.2), "EUR", PaymentType.NORMAL));
+        service.createNewCase(new PaymentRequest(1l, new Amount(BigDecimal.valueOf(102.2), "EUR"), PaymentType.NORMAL));
 
         service.solveCase(new CaseSolvingRequest(1L, ResolutionStatus.RESUBMIT));
 
@@ -84,7 +85,7 @@ class CaseHandlerServiceTest {
 
     @Test
     void countOfActiveCases() {
-        service.createNewCase(new PaymentRequest(1l, BigDecimal.valueOf(102.2), "EUR", PaymentType.NORMAL));
+        service.createNewCase(new PaymentRequest(1l, new Amount(BigDecimal.valueOf(102.2), "EUR"), PaymentType.NORMAL));
 
         var countOfCases = service.countOfActiveCases();
 
