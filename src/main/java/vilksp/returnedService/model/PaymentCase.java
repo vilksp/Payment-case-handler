@@ -1,8 +1,11 @@
 package vilksp.returnedService.model;
 
 import jakarta.persistence.*;
+import vilksp.returnedService.model.exception.CaseHandlerException;
 
 import java.time.LocalDateTime;
+
+import static vilksp.returnedService.model.constants.ExceptionMessages.CASE_SOLVED;
 
 @Entity
 public class PaymentCase {
@@ -32,7 +35,7 @@ public class PaymentCase {
     }
 
     public void solve() {
-        if (isSolved()) throw new RuntimeException();
+        if (isSolved()) throw new CaseHandlerException(CASE_SOLVED);
         this.solved = true;
     }
 

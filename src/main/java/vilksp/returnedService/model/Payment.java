@@ -6,6 +6,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import vilksp.returnedService.model.exception.CaseHandlerException;
+
+import static vilksp.returnedService.model.constants.ExceptionMessages.INVALID_RESOLUTION;
 
 @Entity
 public class Payment {
@@ -17,7 +20,7 @@ public class Payment {
 
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition="JSON")
+    @Column(columnDefinition = "JSON")
     private Amount amount;
     private PaymentType type;
 
@@ -38,7 +41,8 @@ public class Payment {
     }
 
     public void changeResolutionStatus(ResolutionStatus statusToChange) {
-        this.status = statusToChange;
+        if (statusToChange.equals(ResolutionStatus.NONE)) throw new CaseHandlerException(INVALID_RESOLUTION);
+            this.status = statusToChange;
     }
 
     public Long getId() {
