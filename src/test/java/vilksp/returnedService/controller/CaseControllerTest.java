@@ -41,7 +41,7 @@ class CaseControllerTest {
 
     @Test
     void createPaymentCase() throws JSONException {
-        PaymentRequest pr = new PaymentRequest(1L, new Amount(BigDecimal.valueOf(10123.22),"EUR"), PaymentType.NORMAL);
+        PaymentRequest pr = new PaymentRequest(1L, new Amount(BigDecimal.valueOf(10123.22), "EUR"), PaymentType.NORMAL);
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<PaymentRequest> he = new HttpEntity<>(pr, headers);
 
@@ -59,15 +59,15 @@ class CaseControllerTest {
 
     @Test
     void solvePaymentCase() throws JSONException {
-        PaymentRequest pr = new PaymentRequest(1L, new Amount(BigDecimal.valueOf(10123.22),"EUR"), PaymentType.NORMAL);
+        PaymentRequest pr = new PaymentRequest(1L, new Amount(BigDecimal.valueOf(10123.22), "EUR"), PaymentType.NORMAL);
         HttpHeaders hh = new HttpHeaders();
         HttpEntity<PaymentRequest> httpEntity = new HttpEntity<>(pr, hh);
         restTemplate.postForEntity("/api/v1/cases", httpEntity, String.class);
 
         HttpHeaders headers = new HttpHeaders();
-        CaseSolvingRequest request = new CaseSolvingRequest(1L, ResolutionStatus.RESUBMIT);
+        CaseSolvingRequest request = new CaseSolvingRequest(ResolutionStatus.RESUBMIT);
         HttpEntity<CaseSolvingRequest> he = new HttpEntity<>(request, headers);
-        ResponseEntity<?> response = restTemplate.postForEntity("/api/v1/solveCase", he, String.class);
+        ResponseEntity<?> response = restTemplate.postForEntity("/api/v1/cases/1/resolution", he, String.class);
 
         JSONObject jsonObject = new JSONObject(response.getBody().toString());
         var returnedPayment = jsonObject.get("payment");
@@ -76,14 +76,14 @@ class CaseControllerTest {
 
     @Test
     void exceptionIsThrownWhenReturnedPaymentIsReturnedAgain() {
-        PaymentRequest pr = new PaymentRequest(1L, new Amount(BigDecimal.valueOf(10123.22),"EUR"), PaymentType.RETURNED);
+        PaymentRequest pr = new PaymentRequest(1L, new Amount(BigDecimal.valueOf(10123.22), "EUR"), PaymentType.RETURNED);
         HttpHeaders hh = new HttpHeaders();
         HttpEntity<PaymentRequest> httpEntity = new HttpEntity<>(pr, hh);
         restTemplate.postForEntity("/api/v1/cases", httpEntity, String.class);
 
-        CaseSolvingRequest request = new CaseSolvingRequest(1L, ResolutionStatus.RETURN);
+        CaseSolvingRequest request = new CaseSolvingRequest(ResolutionStatus.RETURN);
         HttpEntity<CaseSolvingRequest> he = new HttpEntity<>(request, hh);
-        ResponseEntity<?> response = restTemplate.postForEntity("/api/v1/solveCase", he, String.class);
+        ResponseEntity<?> response = restTemplate.postForEntity("/api/v1/cases/1/resolution", he, String.class);
 
         assertEquals(response.getStatusCode().value(), 400);
         assertEquals(response.getBody(), INVALID_RESOLUTION);
@@ -91,7 +91,7 @@ class CaseControllerTest {
 
     @Test
     void getCountOfActiveCases() {
-        PaymentRequest pr = new PaymentRequest(1L, new Amount(BigDecimal.valueOf(10123.22),"EUR"), PaymentType.NORMAL);
+        PaymentRequest pr = new PaymentRequest(1L, new Amount(BigDecimal.valueOf(10123.22), "EUR"), PaymentType.NORMAL);
         HttpHeaders hh = new HttpHeaders();
         HttpEntity<PaymentRequest> httpEntity = new HttpEntity<>(pr, hh);
         restTemplate.postForEntity("/api/v1/cases", httpEntity, String.class);
@@ -105,9 +105,9 @@ class CaseControllerTest {
     @Test
     void getExceptionWhenSolvingNonExistingCase() {
         HttpHeaders headers = new HttpHeaders();
-        CaseSolvingRequest request = new CaseSolvingRequest(1L, ResolutionStatus.RESUBMIT);
+        CaseSolvingRequest request = new CaseSolvingRequest(ResolutionStatus.RESUBMIT);
         HttpEntity<CaseSolvingRequest> he = new HttpEntity<>(request, headers);
-        ResponseEntity<?> response = restTemplate.postForEntity("/api/v1/solveCase", he, String.class);
+        ResponseEntity<?> response = restTemplate.postForEntity("/api/v1/cases/1/resolution", he, String.class);
 
         assertEquals(response.getStatusCode().value(), 400);
         assertEquals(response.getBody(), NOT_FOUND_CASE);

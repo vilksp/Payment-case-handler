@@ -42,17 +42,17 @@ class CaseHandlerServiceTest {
     void solveCase() {
         service.createNewCase(new PaymentRequest(1l, new Amount(BigDecimal.valueOf(102.2), "EUR"), PaymentType.NORMAL));
 
-        var solvedCase = service.solveCase(new CaseSolvingRequest(1L, ResolutionStatus.RETURN));
+        var solvedCase = service.solveCase(1L, new CaseSolvingRequest(ResolutionStatus.RETURN));
 
         assertEquals(solvedCase.getPayment().getStatus(), ResolutionStatus.RETURN);
     }
 
     @Test
     void exceptionIsThrownWhenReturnedPaymentIsReturnedAgain() {
-        service.createNewCase(new PaymentRequest(1l, new Amount(BigDecimal.valueOf(102.2), "EUR"), PaymentType.RETURNED));
+        service.createNewCase(new PaymentRequest(1L, new Amount(BigDecimal.valueOf(102.2), "EUR"), PaymentType.RETURNED));
 
         var exception = assertThrows(CaseHandlerException.class, () -> {
-            service.solveCase(new CaseSolvingRequest(1L, ResolutionStatus.RETURN));
+            service.solveCase(1L, new CaseSolvingRequest(ResolutionStatus.RETURN));
 
         });
         assertEquals(exception.getMessage(), ExceptionMessages.INVALID_RESOLUTION);
@@ -60,10 +60,10 @@ class CaseHandlerServiceTest {
 
     @Test
     void exceptionIsThrownWithWrongArguments() {
-        service.createNewCase(new PaymentRequest(1l, new Amount(BigDecimal.valueOf(102.2), "EUR"), PaymentType.RETURNED));
+        service.createNewCase(new PaymentRequest(1L, new Amount(BigDecimal.valueOf(102.2), "EUR"), PaymentType.RETURNED));
 
         var exception = assertThrows(CaseHandlerException.class, () -> {
-            service.solveCase(new CaseSolvingRequest(-100L, ResolutionStatus.NONE));
+            service.solveCase(-100L, new CaseSolvingRequest(ResolutionStatus.NONE));
 
         });
         assertEquals(exception.getMessage(), ExceptionMessages.INVALID_ARGUMENTS);
@@ -73,10 +73,10 @@ class CaseHandlerServiceTest {
     void exceptionIsThrownWhenCaseIsResubmitted() {
         service.createNewCase(new PaymentRequest(1l, new Amount(BigDecimal.valueOf(102.2), "EUR"), PaymentType.NORMAL));
 
-        service.solveCase(new CaseSolvingRequest(1L, ResolutionStatus.RESUBMIT));
+        service.solveCase(1L, new CaseSolvingRequest(ResolutionStatus.RESUBMIT));
 
         var exception = assertThrows(CaseHandlerException.class, () -> {
-            service.solveCase(new CaseSolvingRequest(1L, ResolutionStatus.RESUBMIT));
+            service.solveCase(1L, new CaseSolvingRequest(ResolutionStatus.RESUBMIT));
 
         });
         assertEquals(exception.getMessage(), ExceptionMessages.SOLVED_CASE);
@@ -91,7 +91,7 @@ class CaseHandlerServiceTest {
 
         assertEquals(countOfCases, 1L);
 
-        service.solveCase(new CaseSolvingRequest(1L, ResolutionStatus.RETURN));
+        service.solveCase(1L,new CaseSolvingRequest(ResolutionStatus.RETURN));
 
         countOfCases = service.countOfActiveCases();
 

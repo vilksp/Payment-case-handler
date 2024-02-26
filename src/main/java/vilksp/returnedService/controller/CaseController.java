@@ -26,9 +26,9 @@ public class CaseController {
         return new ResponseEntity<>(service.createNewCase(request), CREATED);
     }
 
-    @PostMapping("/solveCase")
-    public ResponseEntity<PaymentCase> solvePaymentCase(@RequestBody CaseSolvingRequest request) {
-        return new ResponseEntity(service.solveCase(request), OK);
+    @PostMapping("/cases/{id}/resolution")
+    public ResponseEntity<PaymentCase> solvePaymentCase(@PathVariable Long id, @RequestBody CaseSolvingRequest request) {
+        return new ResponseEntity(service.solveCase(id, request), OK);
     }
 
     @GetMapping("/activeCases")

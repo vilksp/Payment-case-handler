@@ -1,9 +1,8 @@
 package vilksp.returnedService.service;
 
 import org.springframework.stereotype.Service;
-import vilksp.returnedService.model.PaymentCase;
 import vilksp.returnedService.model.Payment;
-import vilksp.returnedService.model.PaymentType;
+import vilksp.returnedService.model.PaymentCase;
 import vilksp.returnedService.model.ResolutionStatus;
 import vilksp.returnedService.model.exception.CaseHandlerException;
 import vilksp.returnedService.payload.CaseSolvingRequest;
@@ -29,11 +28,11 @@ public class CaseHandlerService {
     }
 
 
-    public PaymentCase solveCase(CaseSolvingRequest request) {
-        if (request.getCaseId() < 0 || request.getStatus().equals(ResolutionStatus.NONE))
+    public PaymentCase solveCase(Long id,CaseSolvingRequest request) {
+        if (id < 0 || request.status().equals(ResolutionStatus.NONE))
             throw new CaseHandlerException(INVALID_ARGUMENTS);
 
-        var caseToFind = repository.findById(request.getCaseId());
+        var caseToFind = repository.findById(id);
 
         if (caseToFind.isEmpty()) throw new CaseHandlerException(NOT_FOUND_CASE);
 
@@ -41,26 +40,7 @@ public class CaseHandlerService {
 
         if (currentCase.isSolved()) throw new CaseHandlerException(SOLVED_CASE);
 
-        if (currentCase.getPayment().getType().equals(PaymentType.NORMAL)) {
-            return normalPaymentResolver(currentCase, request.getStatus());
-        } else {
-            return returnedPaymentResolver(currentCase, request.getStatus());
-        }
-    }
-
-
-    private PaymentCase returnedPaymentResolver(PaymentCase currentCase, ResolutionStatus status) {
-        if (status.equals(ResolutionStatus.RETURN))
-            throw new CaseHandlerException(INVALID_RESOLUTION);
-        currentCase.getPayment().changeResolutionStatus(status);
-        currentCase.solve();
-        return repository.save(currentCase);
-    }
-
-    private PaymentCase normalPaymentResolver(PaymentCase currentCase, ResolutionStatus status) {
-        currentCase.getPayment().changeResolutionStatus(status);
-        currentCase.solve();
-        return repository.save(currentCase);
+        return repository.save(currentCase.resolveCase(currentCase, request.status()));
     }
 
     public long countOfActiveCases() {

@@ -6,6 +6,7 @@ import vilksp.returnedService.model.exception.CaseHandlerException;
 import java.time.LocalDateTime;
 
 import static vilksp.returnedService.model.constants.ExceptionMessages.CASE_SOLVED;
+import static vilksp.returnedService.model.constants.ExceptionMessages.INVALID_RESOLUTION;
 
 @Entity
 public class PaymentCase {
@@ -37,6 +38,28 @@ public class PaymentCase {
     public void solve() {
         if (isSolved()) throw new CaseHandlerException(CASE_SOLVED);
         this.solved = true;
+    }
+
+    public PaymentCase resolveCase(PaymentCase paymentCase, ResolutionStatus status) {
+        if (paymentCase.getPayment().getType().equals(PaymentType.NORMAL)) {
+            return normalPaymentResolver(paymentCase, status);
+        } else {
+            return returnedPaymentResolver(paymentCase, status);
+        }
+    }
+
+    private PaymentCase returnedPaymentResolver(PaymentCase currentCase, ResolutionStatus status) {
+        if (status.equals(ResolutionStatus.RETURN))
+            throw new CaseHandlerException(INVALID_RESOLUTION);
+        currentCase.getPayment().changeResolutionStatus(status);
+        currentCase.solve();
+        return currentCase;
+    }
+
+    private PaymentCase normalPaymentResolver(PaymentCase currentCase, ResolutionStatus status) {
+        currentCase.getPayment().changeResolutionStatus(status);
+        currentCase.solve();
+        return currentCase;
     }
 
     public Payment getPayment() {
